@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Analysis Portal | Local Host</title>
+  <meta name="description" content="Local Student Analysis System - Comprehensive Academic & Attendance Analytics">
+  
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- Main App Layout -->
+  <div class="app-layout">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-icon">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <div class="brand-text">
+          <h2>StudentIQ</h2>
+          <span class="badge-sub">Local Portal</span>
+        </div>
+      </div>
+
+      <nav class="nav-menu">
+        <div class="nav-section-label">CORE MODULES</div>
+        <a href="#dashboard" class="nav-item active" data-tab="dashboard">
+          <i class="fa-solid fa-gauge-high"></i>
+          <span>Dashboard</span>
+          <span class="screen-pill">Sc. 3</span>
+        </a>
+        <a href="#students" class="nav-item" data-tab="students">
+          <i class="fa-solid fa-user-graduate"></i>
+          <span>Students</span>
+          <span class="screen-pill">Sc. 4-7</span>
+        </a>
+        <a href="#attendance" class="nav-item" data-tab="attendance">
+          <i class="fa-solid fa-calendar-check"></i>
+          <span>Attendance</span>
+          <span class="screen-pill">Sc. 8-9</span>
+        </a>
+        <a href="#marks" class="nav-item" data-tab="marks">
+          <i class="fa-solid fa-award"></i>
+          <span>Marks & Exams</span>
+          <span class="screen-pill">Sc. 10-11</span>
+        </a>
+
+        <div class="nav-section-label">INTELLIGENCE & AI</div>
+        <a href="#agent" class="nav-item" data-tab="agent">
+          <i class="fa-solid fa-robot text-purple"></i>
+          <span>AI Email Agent</span>
+          <span class="screen-pill" style="background:rgba(168,85,247,0.25); color:#c084fc;">Auto Bot</span>
+        </a>
+        <a href="#risk" class="nav-item" data-tab="risk">
+          <i class="fa-solid fa-triangle-exclamation text-amber"></i>
+          <span>Risk & Alerts</span>
+          <span class="screen-pill badge-alert-pill">AI Intel</span>
+        </a>
+        <a href="#portal" class="nav-item" data-tab="portal">
+          <i class="fa-solid fa-id-card-clip text-info"></i>
+          <span>Student Portal</span>
+          <span class="screen-pill">Self-Svc</span>
+        </a>
+        <a href="#analytics" class="nav-item" data-tab="analytics">
+          <i class="fa-solid fa-chart-column"></i>
+          <span>Analytics</span>
+          <span class="screen-pill">Sc. 12-13</span>
+        </a>
+        <a href="#reports" class="nav-item" data-tab="reports">
+          <i class="fa-solid fa-file-invoice"></i>
+          <span>Reports & Export</span>
+          <span class="screen-pill">Sc. 14-15</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <a href="/api/database/backup" class="btn-backup-link" download title="Download full SQLite snapshot">
+          <i class="fa-solid fa-cloud-arrow-down"></i>
+          <span>Backup Database (.sqlite)</span>
+        </a>
+        <div class="db-status-card">
+          <div class="status-indicator">
+            <span class="pulse-dot"></span>
+            <span>Database Active</span>
+          </div>
+          <small class="db-source">student_db.sql</small>
+        </div>
+        <div class="user-profile-badge">
+          <div class="user-avatar" id="nav-user-avatar">H</div>
+          <div class="user-details">
+            <span class="user-name" id="nav-username">Hardik</span>
+            <span class="user-role">Administrator</span>
+          </div>
+          <button class="btn-icon" id="btn-show-auth" title="Switch User or Login">
+            <i class="fa-solid fa-right-from-bracket"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-wrapper">
+      <!-- Top Navbar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-toggle" id="mobile-toggle">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="breadcrumb">
+            <span id="breadcrumb-section">Portal</span>
+            <i class="fa-solid fa-chevron-right breadcrumb-separator"></i>
+            <span id="breadcrumb-page" class="active-page">Dashboard Overview</span>
+          </div>
+        </div>
+        
+        <div class="topbar-right">
+          <div class="quick-status">
+            <i class="fa-solid fa-server"></i>
+            <span>localhost:5000</span>
+          </div>
+          <button class="theme-toggle" id="theme-toggle" title="Toggle Theme">
+            <i class="fa-solid fa-moon"></i>
+          </button>
+          <button class="btn-primary-sm" onclick="showModal('modal-add-student')">
+            <i class="fa-solid fa-plus"></i>
+            <span>Add Student</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- View Containers -->
+      <div class="content-body">
+        
+        <!-- ================= TAB 1: DASHBOARD (Screen 3) ================= -->
+        <section id="tab-dashboard" class="tab-pane active">
+          <div class="welcome-banner">
+            <div class="welcome-content">
+              <h1>Welcome back, <span class="highlight" id="greeting-username">Hardik</span>! 👋</h1>
+              <p>Student Analysis & Academic Performance Dashboard — All 15 system screens operational.</p>
+            </div>
+            <div class="banner-quick-actions">
+              <button class="btn-banner" onclick="showModal('modal-add-attendance')">
+                <i class="fa-solid fa-calendar-plus"></i> Mark Attendance
+              </button>
+              <button class="btn-banner" onclick="showModal('modal-add-marks')">
+                <i class="fa-solid fa-pen-to-square"></i> Record Marks
+              </button>
+              <button class="btn-banner warning" onclick="switchTab('risk')">
+                <i class="fa-solid fa-triangle-exclamation"></i> Risk Radar
+              </button>
+              <button class="btn-banner outline" onclick="switchTab('reports')">
+                <i class="fa-solid fa-file-export"></i> Full Report
+              </button>
+            </div>
+          </div>
+
+          <!-- KPI Metric Cards -->
+          <div class="stats-grid stats-grid-6">
+            <div class="stat-card">
+              <div class="stat-icon icon-blue">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Total Students (Screen 5)</span>
+                <h3 class="stat-value" id="kpi-total-students">-</h3>
+                <span class="stat-meta text-success"><i class="fa-solid fa-arrow-up"></i> Active Roster</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon icon-purple">
+                <i class="fa-solid fa-chart-line"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Average Performance (Screen 12)</span>
+                <h3 class="stat-value" id="kpi-avg-marks">-%</h3>
+                <span class="stat-meta text-info"><i class="fa-solid fa-calculator"></i> Exam Aggregate</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon icon-green">
+                <i class="fa-solid fa-clipboard-user"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Attendance Rate (Screen 13)</span>
+                <h3 class="stat-value" id="kpi-attendance-rate">-%</h3>
+                <span class="stat-meta text-success"><i class="fa-solid fa-check"></i> Overall Present</span>
+              </div>
+            </div>
+
+            <div class="stat-card">
+              <div class="stat-icon icon-amber">
+                <i class="fa-solid fa-book-open"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Total Exam Records (Screen 11)</span>
+                <h3 class="stat-value" id="kpi-total-exams">-</h3>
+                <span class="stat-meta text-muted"><i class="fa-solid fa-database"></i> Evaluated</span>
+              </div>
+            </div>
+
+            <div class="stat-card stat-alert-card">
+              <div class="stat-icon icon-warning">
+                <i class="fa-solid fa-user-xmark"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">&lt;75% Attendance Defaulters</span>
+                <h3 class="stat-value text-amber" id="kpi-defaulters">0</h3>
+                <span class="stat-meta text-amber"><i class="fa-solid fa-bell"></i> Defaulter Warning</span>
+              </div>
+            </div>
+
+            <div class="stat-card stat-danger-card">
+              <div class="stat-icon icon-danger">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Critical At-Risk Students</span>
+                <h3 class="stat-value text-danger" id="kpi-critical">0</h3>
+                <span class="stat-meta text-danger"><i class="fa-solid fa-circle-exclamation"></i> Immediate Attention</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dashboard Charts Row -->
+          <div class="charts-row">
+            <div class="card chart-card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Screen 12: Bar Graph - Marks Analysis</h3>
+                  <p class="card-subtitle">Average marks per student across all evaluated subjects</p>
+                </div>
+                <button class="btn-text" onclick="switchTab('analytics')">
+                  Full Analytics <i class="fa-solid fa-arrow-right"></i>
+                </button>
+              </div>
+              <div class="card-body chart-wrapper">
+                <canvas id="dashboard-bar-chart"></canvas>
+              </div>
+            </div>
+
+            <div class="card chart-card-sm">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title">Screen 13: Attendance Distribution</h3>
+                  <p class="card-subtitle">Present vs Absent ratio</p>
+                </div>
+              </div>
+              <div class="card-body chart-wrapper donut-wrapper">
+                <canvas id="dashboard-pie-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Leaderboard & Recent Activity -->
+          <div class="bottom-row">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title"><i class="fa-solid fa-trophy text-amber"></i> Top Academic Performers</h3>
+                <span class="badge-pill">Top 5</span>
+              </div>
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table" id="dashboard-top-students-table">
+                    <thead>
+                      <tr>
+                        <th>Rank</th>
+                        <th>Student Name</th>
+                        <th>Roll No</th>
+                        <th>Class</th>
+                        <th>Average Score</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr><td colspan="5" class="text-center py-4">Loading top performers...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 2: STUDENTS (Screens 4, 5, 6, 7) ================= -->
+        <section id="tab-students" class="tab-pane">
+          <div class="page-header">
+            <div>
+              <h2>Screen 4–7: Student Directory & Management</h2>
+              <p>Add new enrollments, view roster, update records, and generate official credentials.</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn-outline" onclick="showModal('modal-bulk-import')">
+                <i class="fa-solid fa-file-csv"></i> Bulk CSV Import
+              </button>
+              <button class="btn-primary" onclick="showModal('modal-add-student')">
+                <i class="fa-solid fa-user-plus"></i> Add Student (Screen 4)
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-toolbar">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="students-search" placeholder="Search by name, roll no, city, or class...">
+              </div>
+              <div class="toolbar-actions">
+                <button class="btn-outline" onclick="loadStudents()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table" id="students-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Class</th>
+                    <th>City</th>
+                    <th>Phone</th>
+                    <th class="text-right">Actions & Transcripts</th>
+                  </tr>
+                </thead>
+                <tbody id="students-tbody">
+                  <tr><td colspan="7" class="text-center py-4">Loading student records...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 3: ATTENDANCE (Screens 8, 9) ================= -->
+        <section id="tab-attendance" class="tab-pane">
+          <div class="page-header">
+            <div>
+              <h2>Screen 8 & 9: Attendance Register</h2>
+              <p>Mark daily attendance, inspect date-wise logs, and track student presence.</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn-outline" onclick="showModal('modal-bulk-attendance')">
+                <i class="fa-solid fa-list-check"></i> Bulk Mark Attendance
+              </button>
+              <button class="btn-primary" onclick="showModal('modal-add-attendance')">
+                <i class="fa-solid fa-check"></i> Single Attendance (Screen 8)
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-toolbar">
+              <div class="filter-group">
+                <label>Date Filter:</label>
+                <input type="date" id="attendance-date-filter" class="form-input-sm">
+              </div>
+              <div class="filter-group">
+                <label>Student:</label>
+                <select id="attendance-student-filter" class="form-input-sm">
+                  <option value="">All Students</option>
+                </select>
+              </div>
+              <div class="toolbar-actions">
+                <button class="btn-outline" onclick="resetAttendanceFilters()"><i class="fa-solid fa-eraser"></i> Clear</button>
+                <button class="btn-outline" onclick="loadAttendance()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table" id="attendance-table">
+                <thead>
+                  <tr>
+                    <th>Record ID</th>
+                    <th>Date</th>
+                    <th>Student Name</th>
+                    <th>Roll No</th>
+                    <th>Class</th>
+                    <th>Status</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="attendance-tbody">
+                  <tr><td colspan="7" class="text-center py-4">Loading attendance records...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 4: MARKS & EXAMS (Screens 10, 11) ================= -->
+        <section id="tab-marks" class="tab-pane">
+          <div class="page-header">
+            <div>
+              <h2>Screen 10 & 11: Marks & Subject Assessment</h2>
+              <p>Record exam scores, view subject-wise results, and evaluate academic grading.</p>
+            </div>
+            <button class="btn-primary" onclick="showModal('modal-add-marks')">
+              <i class="fa-solid fa-plus"></i> Add Marks (Screen 10)
+            </button>
+          </div>
+
+          <div class="card">
+            <div class="table-toolbar">
+              <div class="filter-group">
+                <label>Student:</label>
+                <select id="marks-student-filter" class="form-input-sm">
+                  <option value="">All Students</option>
+                </select>
+              </div>
+              <div class="toolbar-actions">
+                <button class="btn-outline" onclick="loadMarks()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table" id="marks-table">
+                <thead>
+                  <tr>
+                    <th>Record ID</th>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Class</th>
+                    <th>Subject</th>
+                    <th>Score / Total</th>
+                    <th>Percentage</th>
+                    <th>Grade</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="marks-tbody">
+                  <tr><td colspan="9" class="text-center py-4">Loading marks records...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 5: ANALYTICS (Screens 12, 13) ================= -->
+        <section id="tab-analytics" class="tab-pane">
+          <div class="page-header">
+            <div>
+              <h2>Screen 12 & 13: Visual Analytics & Insights</h2>
+              <p>Interactive graphical data visualization powered by Chart.js (replaces Matplotlib for web).</p>
+            </div>
+            <button class="btn-outline" onclick="loadAnalytics()"><i class="fa-solid fa-rotate"></i> Refresh Charts</button>
+          </div>
+
+          <div class="analytics-grid">
+            <div class="card chart-card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title"><i class="fa-solid fa-chart-column text-info"></i> Screen 12: Bar Graph - Marks Analysis</h3>
+                  <p class="card-subtitle">Average marks distribution across all enrolled students</p>
+                </div>
+              </div>
+              <div class="card-body chart-wrapper">
+                <canvas id="analytics-bar-chart"></canvas>
+              </div>
+            </div>
+
+            <div class="card chart-card">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title"><i class="fa-solid fa-chart-pie text-success"></i> Screen 13: Pie Chart - Attendance</h3>
+                  <p class="card-subtitle">Overall attendance presence vs absenteeism percentage</p>
+                </div>
+              </div>
+              <div class="card-body chart-wrapper donut-wrapper">
+                <canvas id="analytics-pie-chart"></canvas>
+              </div>
+            </div>
+
+            <div class="card chart-card full-width">
+              <div class="card-header">
+                <div>
+                  <h3 class="card-title"><i class="fa-solid fa-chart-line text-purple"></i> Subject-Wise Average Performance</h3>
+                  <p class="card-subtitle">Comparison of average scores across all subjects</p>
+                </div>
+              </div>
+              <div class="card-body chart-wrapper">
+                <canvas id="analytics-subject-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 6: REPORTS & EXPORT (Screens 14, 15) ================= -->
+        <section id="tab-reports" class="tab-pane">
+          <div class="page-header">
+            <div>
+              <h2>Screen 14 & 15: Comprehensive Reports & Export</h2>
+              <p>Consolidated view joining Students, Marks, and Attendance records with multi-format export.</p>
+            </div>
+            <div class="header-actions">
+              <a href="/api/reports/export?format=txt" class="btn-amber" download>
+                <i class="fa-solid fa-file-lines"></i> Screen 15: Export to TXT
+              </a>
+              <a href="/api/reports/export?format=csv" class="btn-outline" download>
+                <i class="fa-solid fa-file-csv"></i> Export CSV
+              </a>
+              <button class="btn-outline" onclick="window.print()">
+                <i class="fa-solid fa-print"></i> Print Report
+              </button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Screen 14: Comprehensive Report Register</h3>
+              <button class="btn-text" onclick="loadFullReport()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+            </div>
+            <div class="table-responsive">
+              <table class="table" id="reports-table">
+                <thead>
+                  <tr>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Class</th>
+                    <th>City</th>
+                    <th>Phone</th>
+                    <th>Subject</th>
+                    <th>Marks</th>
+                    <th>Attendance Status</th>
+                  </tr>
+                </thead>
+                <tbody id="reports-tbody">
+                  <tr><td colspan="8" class="text-center py-4">Loading consolidated report...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 7: EARLY WARNING & RISK RADAR ================= -->
+        <section id="tab-risk" class="tab-pane">
+          <div class="page-header">
+            <div>
+              <h2><i class="fa-solid fa-triangle-exclamation text-amber"></i> Early Warning &amp; Academic Risk Radar</h2>
+              <p>AI-driven early intervention engine identifying students below 75% attendance or with failing grades.</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn-outline" onclick="loadRiskAnalysis()"><i class="fa-solid fa-rotate"></i> Refresh Risk Radar</button>
+            </div>
+          </div>
+
+          <!-- Risk overview summary cards -->
+          <div class="stats-grid" style="margin-bottom: 24px;">
+            <div class="stat-card" style="border-left: 4px solid var(--danger);">
+              <div class="stat-icon icon-danger">
+                <i class="fa-solid fa-skull-crossbones"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Critical At-Risk</span>
+                <h3 class="stat-value text-danger" id="risk-count-critical">0</h3>
+                <span class="stat-meta text-danger">Debarment / Failure Hazard</span>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-left: 4px solid var(--warning);">
+              <div class="stat-icon icon-warning">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Attendance Defaulters (&lt;75%)</span>
+                <h3 class="stat-value text-amber" id="risk-count-defaulters">0</h3>
+                <span class="stat-meta text-amber">Mandatory Warning Required</span>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-left: 4px solid var(--success);">
+              <div class="stat-icon icon-green">
+                <i class="fa-solid fa-shield-halved"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Safe &amp; On-Track</span>
+                <h3 class="stat-value text-success" id="risk-count-safe">0</h3>
+                <span class="stat-meta text-success">Compliant Standing</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="table-toolbar">
+              <div class="filter-group">
+                <label>Filter Level:</label>
+                <select id="risk-filter-level" class="form-input-sm" onchange="filterRiskTable()">
+                  <option value="">All Statuses</option>
+                  <option value="Critical">Critical Only</option>
+                  <option value="Warning">Warning / Defaulters</option>
+                  <option value="Safe">Safe Standing</option>
+                </select>
+              </div>
+              <div class="toolbar-actions">
+                <button class="btn-outline" onclick="loadRiskAnalysis()"><i class="fa-solid fa-rotate"></i> Refresh</button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table" id="risk-table">
+                <thead>
+                  <tr>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Class</th>
+                    <th>Attendance %</th>
+                    <th>Exam Avg %</th>
+                    <th>Status Risk</th>
+                    <th>AI Remedial Assessment</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="risk-tbody">
+                  <tr><td colspan="8" class="text-center py-4">Evaluating student risk metrics...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================= TAB 8: STUDENT SELF-SERVICE PORTAL ================= -->
+        <section id="tab-portal" class="tab-pane">
+          <div class="page-header">
+            <div>
+              <h2><i class="fa-solid fa-id-card-clip text-info"></i> Student &amp; Parent Self-Service Portal</h2>
+              <p>Instant credential lookup by Roll Number to preview personal academic marks, attendance, and transcripts.</p>
+            </div>
+          </div>
+
+          <div class="card" style="max-width: 780px; margin: 0 auto 30px;">
+            <div class="card-body">
+              <form id="form-portal-lookup" onsubmit="handlePortalLookup(event)" style="padding: 0;">
+                <div class="form-group">
+                  <label style="font-size: 1rem; font-weight: 600;">Enter Student Roll Number:</label>
+                  <div style="display: flex; gap: 10px;">
+                    <input type="text" id="portal-roll-input" class="form-input" placeholder="e.g. 101, 102, 103, 104..." style="font-size: 1.1rem; padding: 12px 16px;" required>
+                    <button type="submit" class="btn-primary" style="white-space: nowrap; padding: 0 24px;">
+                      <i class="fa-solid fa-magnifying-glass"></i> Access Records
+                    </button>
+                  </div>
+                  <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                    <small class="text-muted">Quick Demos:</small>
+                    <button type="button" class="badge-roll" style="cursor: pointer; border: none;" onclick="quickLookup('101')">Roll 101 (Tejas)</button>
+                    <button type="button" class="badge-roll" style="cursor: pointer; border: none;" onclick="quickLookup('102')">Roll 102 (Aman)</button>
+                    <button type="button" class="badge-roll" style="cursor: pointer; border: none;" onclick="quickLookup('103')">Roll 103 (Priya)</button>
+                    <button type="button" class="badge-roll" style="cursor: pointer; border: none;" onclick="quickLookup('104')">Roll 104 (Rahul)</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Dynamic Portal Student Result Container -->
+          <div id="portal-result-container" class="hidden">
+            <!-- Dynamically populated via JS -->
+          </div>
+        </section>
+
+        <!-- ================= TAB 9: AI ATTENDANCE RISK EMAIL AGENT ================= -->
+        <section id="tab-agent" class="tab-pane">
+          <div class="page-header">
+            <div>
+              <h2><i class="fa-solid fa-robot text-purple"></i> AI Attendance Risk Email Agent</h2>
+              <p>Autonomous monitoring agent that scans the roster, flags &lt;75% attendance defaulters, and crafts formal warning emails.</p>
+            </div>
+            <div class="header-actions">
+              <button class="btn-primary" onclick="runAgentScan()">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Run Autonomous Scan
+              </button>
+              <button class="btn-outline" onclick="loadAgentLogs()">
+                <i class="fa-solid fa-clock-rotate-left"></i> Refresh Sent History
+              </button>
+            </div>
+          </div>
+
+          <!-- Agent Metrics Grid -->
+          <div class="stats-grid" style="margin-bottom: 24px;">
+            <div class="stat-card" style="border-left: 4px solid var(--warning);">
+              <div class="stat-icon icon-warning">
+                <i class="fa-solid fa-user-xmark"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Defaulters Flagged (&lt;75%)</span>
+                <h3 class="stat-value text-amber" id="agent-stat-defaulters">0</h3>
+                <span class="stat-meta text-amber">Active Target Students</span>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-left: 4px solid var(--purple);">
+              <div class="stat-icon icon-purple">
+                <i class="fa-solid fa-envelope-open-text"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">AI Drafts in Queue</span>
+                <h3 class="stat-value text-purple" id="agent-stat-queued">0</h3>
+                <span class="stat-meta text-purple">Ready for One-Click Dispatch</span>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-left: 4px solid var(--danger);">
+              <div class="stat-icon icon-danger">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Critical Debarment Hazard</span>
+                <h3 class="stat-value text-danger" id="agent-stat-critical">0</h3>
+                <span class="stat-meta text-danger">&lt;65% Critical Threshold</span>
+              </div>
+            </div>
+
+            <div class="stat-card" style="border-left: 4px solid var(--success);">
+              <div class="stat-icon icon-green">
+                <i class="fa-solid fa-paper-plane"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-label">Total Emails Dispatched</span>
+                <h3 class="stat-value text-success" id="agent-stat-sent">0</h3>
+                <span class="stat-meta text-success">Logged in System Audit</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Agent Queue Card -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <h3 class="card-title"><i class="fa-solid fa-list-check text-purple"></i> Autonomous Email Dispatch Queue</h3>
+                <p class="card-subtitle">Personalized warning drafts generated dynamically based on attendance percentage and absence dates</p>
+              </div>
+              <button class="btn-text" onclick="runAgentScan()"><i class="fa-solid fa-rotate"></i> Re-Scan Roster</button>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table" id="agent-queue-table">
+                <thead>
+                  <tr>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Class</th>
+                    <th>Attendance %</th>
+                    <th>Shortfall</th>
+                    <th>Recipient Email</th>
+                    <th>Urgency Level</th>
+                    <th>AI Recommended Draft</th>
+                    <th class="text-right">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="agent-queue-tbody">
+                  <tr><td colspan="9" class="text-center py-4">Click "Run Autonomous Scan" to trigger the attendance agent...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Email Sent Logs Card -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title"><i class="fa-solid fa-clock-rotate-left text-info"></i> Email Dispatch Audit Trail</h3>
+              <button class="btn-text" onclick="loadAgentLogs()"><i class="fa-solid fa-rotate"></i> Refresh Log</button>
+            </div>
+            <div class="table-responsive">
+              <table class="table" id="agent-logs-table">
+                <thead>
+                  <tr>
+                    <th>Log ID</th>
+                    <th>Roll No</th>
+                    <th>Student Name</th>
+                    <th>Recipient</th>
+                    <th>Subject</th>
+                    <th>Template Type</th>
+                    <th>Status</th>
+                    <th>Dispatched Date &amp; Time</th>
+                  </tr>
+                </thead>
+                <tbody id="agent-logs-tbody">
+                  <tr><td colspan="8" class="text-center py-4">No emails sent yet. Generate and send warning drafts above.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- Modal: Add Student (Screen 4) -->
+  <div id="modal-add-student" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-user-plus text-primary"></i> Screen 4: Add New Student</h3>
+        <button class="btn-close" onclick="closeModal('modal-add-student')">&times;</button>
+      </div>
+      <form id="form-add-student" onsubmit="handleAddStudent(event)">
+        <div class="form-group">
+          <label>Student Full Name <span class="required">*</span></label>
+          <input type="text" id="add-student-name" class="form-input" placeholder="e.g. Tejas Patiala" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Roll Number <span class="required">*</span></label>
+            <input type="text" id="add-student-roll" class="form-input" placeholder="e.g. 107" required>
+          </div>
+          <div class="form-group">
+            <label>Class</label>
+            <input type="text" id="add-student-class" class="form-input" value="BCA-3">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>City</label>
+            <input type="text" id="add-student-city" class="form-input" placeholder="e.g. Patiala">
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="text" id="add-student-phone" class="form-input" placeholder="e.g. 9876543210">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" onclick="closeModal('modal-add-student')">Cancel</button>
+          <button type="submit" class="btn-primary">Save Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Student (Screen 6) -->
+  <div id="modal-edit-student" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-user-pen text-info"></i> Screen 6: Update Student Record</h3>
+        <button class="btn-close" onclick="closeModal('modal-edit-student')">&times;</button>
+      </div>
+      <form id="form-edit-student" onsubmit="handleUpdateStudent(event)">
+        <input type="hidden" id="edit-student-id">
+        <div class="form-group">
+          <label>Student Full Name <span class="required">*</span></label>
+          <input type="text" id="edit-student-name" class="form-input" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Roll Number <span class="required">*</span></label>
+            <input type="text" id="edit-student-roll" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label>Class</label>
+            <input type="text" id="edit-student-class" class="form-input">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>City</label>
+            <input type="text" id="edit-student-city" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="text" id="edit-student-phone" class="form-input">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" onclick="closeModal('modal-edit-student')">Cancel</button>
+          <button type="submit" class="btn-primary">Update Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Attendance (Screen 8) -->
+  <div id="modal-add-attendance" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-clipboard-user text-success"></i> Screen 8: Mark Attendance</h3>
+        <button class="btn-close" onclick="closeModal('modal-add-attendance')">&times;</button>
+      </div>
+      <form id="form-add-attendance" onsubmit="handleAddAttendance(event)">
+        <div class="form-group">
+          <label>Select Student <span class="required">*</span></label>
+          <select id="add-att-student" class="form-input" required>
+            <option value="">-- Choose Student --</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Date <span class="required">*</span></label>
+            <input type="date" id="add-att-date" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label>Status <span class="required">*</span></label>
+            <select id="add-att-status" class="form-input" required>
+              <option value="P">Present (P)</option>
+              <option value="A">Absent (A)</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" onclick="closeModal('modal-add-attendance')">Cancel</button>
+          <button type="submit" class="btn-primary">Record Attendance</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Bulk Attendance -->
+  <div id="modal-bulk-attendance" class="modal">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-list-check text-primary"></i> Fast Bulk Attendance</h3>
+        <button class="btn-close" onclick="closeModal('modal-bulk-attendance')">&times;</button>
+      </div>
+      <form id="form-bulk-attendance" onsubmit="handleBulkAttendance(event)">
+        <div class="form-group">
+          <label>Attendance Date:</label>
+          <input type="date" id="bulk-att-date" class="form-input" required>
+        </div>
+        <div class="bulk-students-container" id="bulk-students-list">
+          <!-- Dynamic student rows -->
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" onclick="closeModal('modal-bulk-attendance')">Cancel</button>
+          <button type="submit" class="btn-primary">Submit All Records</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Marks (Screen 10) -->
+  <div id="modal-add-marks" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-award text-purple"></i> Screen 10: Record Marks</h3>
+        <button class="btn-close" onclick="closeModal('modal-add-marks')">&times;</button>
+      </div>
+      <form id="form-add-marks" onsubmit="handleAddMarks(event)">
+        <div class="form-group">
+          <label>Select Student <span class="required">*</span></label>
+          <select id="add-marks-student" class="form-input" required>
+            <option value="">-- Choose Student --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Subject Name <span class="required">*</span></label>
+          <input type="text" id="add-marks-subject" class="form-input" placeholder="e.g. Python Programming, Database, Maths" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Marks Obtained <span class="required">*</span></label>
+            <input type="number" id="add-marks-obtained" class="form-input" min="0" max="100" placeholder="85" required>
+          </div>
+          <div class="form-group">
+            <label>Total Marks <span class="required">*</span></label>
+            <input type="number" id="add-marks-total" class="form-input" value="100" required>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" onclick="closeModal('modal-add-marks')">Cancel</button>
+          <button type="submit" class="btn-primary">Record Marks</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Auth (Screens 1 & 2: Login & Signup) -->
+  <div id="modal-auth" class="modal">
+    <div class="modal-content auth-modal">
+      <div class="modal-header">
+        <h3 id="auth-title">Screen 1 & 2: User Authentication</h3>
+        <button class="btn-close" onclick="closeModal('modal-auth')">&times;</button>
+      </div>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="btn-tab-login" onclick="toggleAuthMode('login')">Login (Screen 1)</button>
+        <button class="auth-tab-btn" id="btn-tab-signup" onclick="toggleAuthMode('signup')">Sign Up (Screen 2)</button>
+      </div>
+
+      <!-- Login Form -->
+      <form id="form-login" onsubmit="handleLogin(event)">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="login-username" class="form-input" value="Hardik" required>
+          <small class="helper-text">Default administrator account: <code>Hardik</code> / <code>Hardik</code></small>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" class="form-input" value="Hardik" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" onclick="closeModal('modal-auth')">Close</button>
+          <button type="submit" class="btn-primary">Login</button>
+        </div>
+      </form>
+
+      <!-- Signup Form -->
+      <form id="form-signup" class="hidden" onsubmit="handleSignup(event)">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="signup-username" class="form-input" placeholder="Desired username" required>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="signup-email" class="form-input" placeholder="user@gmail.com" required>
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="signup-password" class="form-input" placeholder="••••••••" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-outline" onclick="closeModal('modal-auth')">Close</button>
+          <button type="submit" class="btn-primary">Create Account</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Official Student Report Card (Printable Transcript) -->
+  <div id="modal-report-card" class="modal">
+    <div class="modal-content modal-lg report-card-modal">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-file-invoice text-info"></i> Official Academic Report Card</h3>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button class="btn-primary-sm" onclick="printReportCard()"><i class="fa-solid fa-print"></i> Print / Save PDF</button>
+          <button class="btn-close" onclick="closeModal('modal-report-card')">&times;</button>
+        </div>
+      </div>
+      <div class="modal-body" id="report-card-printable" style="padding: 24px; max-height: 80vh; overflow-y: auto;">
+        <!-- Dynamically rendered printable report card -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Merit Certificate of Academic Excellence -->
+  <div id="modal-certificate" class="modal">
+    <div class="modal-content modal-lg certificate-modal">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-award text-amber"></i> Certificate of Academic Achievement</h3>
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <button class="btn-primary-sm" onclick="printCertificate()"><i class="fa-solid fa-print"></i> Print Certificate</button>
+          <button class="btn-close" onclick="closeModal('modal-certificate')">&times;</button>
+        </div>
+      </div>
+      <div class="modal-body" id="certificate-printable" style="padding: 24px; max-height: 80vh; overflow-y: auto;">
+        <!-- Dynamically rendered certificate -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Bulk CSV Student Import -->
+  <div id="modal-bulk-import" class="modal">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-file-csv text-success"></i> Bulk Student CSV Enrollment</h3>
+        <button class="btn-close" onclick="closeModal('modal-bulk-import')">&times;</button>
+      </div>
+      <form id="form-bulk-import" onsubmit="handleBulkImport(event)">
+        <div class="form-group">
+          <label>CSV Format: <code>Name, RollNo, Class, City, Phone</code></label>
+          <p class="helper-text" style="margin-bottom: 8px;">Paste CSV rows below or click "Insert Sample Template" to test:</p>
+          <textarea id="bulk-csv-textarea" class="form-input" rows="8" placeholder="Tejas Patiala, 101, BCA-3, Patiala, 9876543210&#10;Aman Ambala, 102, BCA-3, Ambala, 9876543211" style="font-family: monospace; font-size: 0.88rem;" required></textarea>
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+          <button type="button" class="btn-outline" onclick="insertSampleCsv()"><i class="fa-solid fa-wand-magic-sparkles"></i> Insert Sample Template</button>
+          <div class="modal-footer" style="margin-top: 0;">
+            <button type="button" class="btn-outline" onclick="closeModal('modal-bulk-import')">Cancel</button>
+            <button type="submit" class="btn-primary"><i class="fa-solid fa-upload"></i> Import Students</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: AI Attendance Risk Email Composer & Dispatcher -->
+  <div id="modal-agent-email" class="modal">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-robot text-purple"></i> AI Attendance Risk Email Composer</h3>
+        <button class="btn-close" onclick="closeModal('modal-agent-email')">&times;</button>
+      </div>
+      <form id="form-agent-email" onsubmit="handleSendAgentEmail(event)">
+        <input type="hidden" id="agent-email-student-id">
+        
+        <!-- Context Card -->
+        <div id="agent-email-student-badge" style="background:rgba(99,102,241,0.08); border:1px solid rgba(99,102,241,0.25); border-radius:var(--radius-sm); padding:10px 14px; margin-bottom:16px; font-size:0.9rem; display:flex; justify-content:space-between; align-items:center;">
+          <span>Target Student: <strong id="agent-target-name">-</strong> (Roll: <strong id="agent-target-roll">-</strong>)</span>
+          <span id="agent-target-rate" class="text-danger font-bold">-%</span>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Template Persona / Urgency</label>
+            <select id="agent-template-select" class="form-input" onchange="regenerateDraftWithTemplate()">
+              <option value="auto">🤖 AI Auto-Recommended (Based on % Deficit)</option>
+              <option value="first_warning">⚠️ First Attendance Warning (70% - 74.9%)</option>
+              <option value="critical_debarment">🚨 Final Debarment Notice (&lt; 65% Severe)</option>
+              <option value="parent_meeting">👨‍👩‍👦 Parent-Faculty Conference Request</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Recipient Email Address <span class="required">*</span></label>
+            <input type="email" id="agent-email-recipient" class="form-input" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Subject Line <span class="required">*</span></label>
+          <input type="text" id="agent-email-subject" class="form-input" required>
+        </div>
+
+        <div class="form-group">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <label style="margin:0;">Email Content</label>
+            <div style="display:flex; gap:8px;">
+              <button type="button" class="btn-text" id="btn-toggle-plain" onclick="setAgentEmailView('plain')" style="font-size:0.8rem; font-weight:700;">Plain Text Draft</button>
+              <button type="button" class="btn-text" id="btn-toggle-html" onclick="setAgentEmailView('html')" style="font-size:0.8rem; color:var(--text-muted);">HTML Visual Preview</button>
+            </div>
+          </div>
+          
+          <textarea id="agent-email-body" class="form-input" rows="9" style="font-family:monospace; font-size:0.85rem;" required></textarea>
+          <div id="agent-email-html-view" class="hidden" style="max-height:220px; overflow-y:auto; border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:10px;">
+            <!-- Rendered HTML -->
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; flex-wrap:wrap; gap:10px;">
+          <div style="display:flex; gap:8px;">
+            <button type="button" class="btn-outline" onclick="copyAgentEmail()"><i class="fa-solid fa-copy"></i> Copy Text</button>
+            <a id="agent-mailto-link" href="#" class="btn-outline" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Open in Mail Client</a>
+          </div>
+          <div class="modal-footer" style="margin:0;">
+            <button type="button" class="btn-outline" onclick="closeModal('modal-agent-email')">Close</button>
+            <button type="submit" class="btn-primary" style="background:linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);">
+              <i class="fa-solid fa-paper-plane"></i> Dispatch &amp; Log Notice
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Custom JavaScript -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
