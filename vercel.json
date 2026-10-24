@@ -8,12 +8,7 @@
   ],
   "functions": {
     "api/index.py": {
-      "includeFiles": [
-        "templates/**",
-        "static/**",
-        "student_db.sqlite",
-        "student_db.sql"
-      ]
+      "includeFiles": "{templates/**,static/**,student_db.sqlite,student_db.sql}"
     }
   }
 }
